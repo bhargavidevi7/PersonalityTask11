@@ -1,2 +1,1 @@
-# PersonalityTask11
-Personality Checker
+"This web application is an MBTI Personality Checker. It allows users to answer a few simple personality-related questions and provides an insight into their personality type based on the MBTI framework. The goal is to help users better understand their behavior and thinking patterns in everyday situations. It's built using HTML, CSS, and JavaScript, and fully deployed on Vercel."
