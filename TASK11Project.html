@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MBTI Personality Checker</title>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: linear-gradient(to right, #e0c3fc, #8ec5fc);
+      color: #333;
+      padding: 20px;
+      max-width: 900px;
+      margin: auto;
+    }
+
+    h1 {
+      text-align: center;
+      color: #2c2c2c;
+    }
+
+    .question {
+      margin-bottom: 20px;
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px #ccc;
+    }
+
+    label {
+      margin: 0 10px;
+      display: inline-block;
+    }
+
+    select {
+      padding: 5px 8px;
+      margin-top: 10px;
+    }
+
+    button {
+      background: #6a0dad;
+      color: white;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 20px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    #result {
+      margin-top: 30px;
+      background: #fff;
+      padding: 20px;
+      border-left: 6px solid #6a0dad;
+      border-radius: 8px;
+      box-shadow: 0 0 10px #aaa;
+    }
+
+    .result-title {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+
+    .result-section {
+      margin-top: 15px;
+    }
+
+    .trait-percent {
+      margin: 4px 0;
+      font-size: 15px;
+    }
+
+    .result-section h4 {
+      margin: 10px 0 5px;
+      color: #222;
+    }
+
+    .result-section p {
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🧠 MBTI Personality Checker</h1>
+  <form id="quizForm"></form>
+  <button onclick="calculateResult()">Submit</button>
+
+  <div id="result" style="display:none;"></div>
+
+  <script>
+    const options = [
+      { label: "Strongly Disagree", value: -2 },
+      { label: "Disagree", value: -1 },
+      { label: "Neutral", value: 0 },
+      { label: "Agree", value: 1 },
+      { label: "Strongly Agree", value: 2 }
+    ];
+
+    const questions = [
+      { text: "You enjoy vibrant social events with lots of people.", type: "E" },
+      { text: "You often prefer staying in rather than going out.", type: "I" },
+      { text: "You focus on the present more than the future.", type: "S" },
+      { text: "You are more interested in abstract ideas than facts.", type: "N" },
+      { text: "You value logical reasoning over emotions.", type: "T" },
+      { text: "You make decisions based on how it affects people.", type: "F" },
+      { text: "You like to have a plan rather than being spontaneous.", type: "J" },
+      { text: "You prefer flexibility to strict schedules.", type: "P" }
+    ];
+
+    const form = document.getElementById("quizForm");
+
+    questions.forEach((q, i) => {
+      const div = document.createElement("div");
+      div.className = "question";
+      div.innerHTML = `
+        <p><strong>${i + 1}.</strong> ${q.text}</p>
+        <select name="q${i}" required>
+          <option value="">-- Select an answer --</option>
+          ${options.map(opt => `<option value="${opt.value}">${opt.label}</option>`).join('')}
+        </select>
+      `;
+      form.appendChild(div);
+    });
+
+    const personalityProfiles = {
+      INTJ: {
+        strengths: "Strategic, independent, analytical",
+        weaknesses: "Overly critical, perfectionist",
+        careers: "Scientist, Engineer, Architect, Analyst",
+        growth: "Work on emotional expression and flexibility."
+      },
+      ENFP: {
+        strengths: "Creative, sociable, enthusiastic",
+        weaknesses: "Easily distracted, overthinker",
+        careers: "Journalist, Teacher, Designer, Psychologist",
+        growth: "Develop consistency and organization."
+      },
+      ISTJ: {
+        strengths: "Responsible, dependable, detail-oriented",
+        weaknesses: "Rigid, too focused on rules",
+        careers: "Accountant, Police Officer, Judge",
+        growth: "Be more open to new ideas and changes."
+      },
+      ESFP: {
+        strengths: "Energetic, friendly, fun-loving",
+        weaknesses: "Impulsive, easily bored",
+        careers: "Performer, Sales Rep, Event Planner",
+        growth: "Work on long-term focus and listening."
+      }
+    };
+
+    function calculateResult() {
+      const scores = { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 };
+
+      questions.forEach((q, i) => {
+        const val = parseInt(document.querySelector(`[name="q${i}"]`).value);
+        if (q.type === "I" || q.type === "N" || q.type === "F" || q.type === "P") {
+          scores[q.type] += val;
+        } else {
+          scores[q.type] += val;
+        }
+      });
+
+      const resultType =
+        (scores.E >= scores.I ? "E" : "I") +
+        (scores.S >= scores.N ? "S" : "N") +
+        (scores.T >= scores.F ? "T" : "F") +
+        (scores.J >= scores.P ? "J" : "P");
+
+      function percent(trait) {
+        const pos = Math.max(0, scores[trait]);
+        const neg = Math.abs(scores[getOpposite(trait)]);
+        const total = pos + neg || 1;
+        return Math.round((pos / total) * 100);
+      }
+
+      function getOpposite(trait) {
+        return { E: "I", I: "E", S: "N", N: "S", T: "F", F: "T", J: "P", P: "J" }[trait];
+      }
+
+      showResult(resultType, percent);
+    }
+
+    function showResult(type, percentFn) {
+      const data = personalityProfiles[type] || {
+        strengths: "Unique and adaptable",
+        weaknesses: "Needs clarity or balance",
+        careers: "Various fields depending on strength",
+        growth: "Focus on understanding self and structure"
+      };
+
+      const resultDiv = document.getElementById("result");
+      resultDiv.style.display = "block";
+
+      resultDiv.innerHTML = `
+        <div class="result-title">Your Personality Type: <b>${type}</b></div>
+        <div class="result-section">
+          <h4>🔢 Trait Percentages:</h4>
+          <p class="trait-percent">Introvert: ${percentFn("I")}% | Extrovert: ${percentFn("E")}%</p>
+          <p class="trait-percent">Sensing: ${percentFn("S")}% | Intuition: ${percentFn("N")}%</p>
+          <p class="trait-percent">Thinking: ${percentFn("T")}% | Feeling: ${percentFn("F")}%</p>
+          <p class="trait-percent">Judging: ${percentFn("J")}% | Perceiving: ${percentFn("P")}%</p>
+        </div>
+        <div class="result-section">
+          <h4>💪 Strengths:</h4>
+          <p>${data.strengths}</p>
+        </div>
+        <div class="result-section">
+          <h4>⚠️ Weaknesses:</h4>
+          <p>${data.weaknesses}</p>
+        </div>
+        <div class="result-section">
+          <h4>💼 Suitable Careers:</h4>
+          <p>${data.careers}</p>
+        </div>
+        <div class="result-section">
+          <h4>📈 Growth Tips:</h4>
+          <p>${data.growth}</p>
+        </div>
+      `;
+      resultDiv.scrollIntoView({ behavior: "smooth" });
+    }
+  </script>
+</body>
+</html>
